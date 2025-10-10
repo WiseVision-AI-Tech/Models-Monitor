@@ -1,0 +1,8 @@
+scrape_configs:
+  - job_name: 'jetson_via_pushgateway'
+    static_configs:
+      - targets: ['10.8.0.2:9091']  # IP de Pushgateway
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['10.8.0.2:9093']  # correspond au service docker Alertmanager
