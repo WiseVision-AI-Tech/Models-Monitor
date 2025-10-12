@@ -1,8 +1,7 @@
+global:
+  scrape_interval: 5s
+
 scrape_configs:
-  - job_name: 'jetson_via_pushgateway'
+  - job_name: "jetson_remote"
     static_configs:
-      - targets: ['10.8.0.2:9091']  # IP de Pushgateway
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: ['10.8.0.2:9093']  # correspond au service docker Alertmanager
+      - targets: ["pushgateway:9091"]

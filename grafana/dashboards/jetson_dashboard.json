@@ -1,0 +1,81 @@
+{
+  "id": null,
+  "title": "Jetson Monitoring Dashboard",
+  "tags": ["jetson", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 16,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "gauge",
+      "title": "GPU Usage (%)",
+      "targets": [{ "expr": "jetson_gpu_load_percent{job=\"jetson_remote\"}" }],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "red", "value": 90 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Temperature (°C)",
+      "targets": [{ "expr": "jetson_cpu_temp_c{job=\"jetson_remote\"}" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "RAM Usage (MB)",
+      "targets": [{ "expr": "jetson_ram_used_mb{job=\"jetson_remote\"}" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "megabytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 8000 },
+              { "color": "red", "value": 12000 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "RAM Total (MB)",
+      "targets": [{ "expr": "jetson_ram_total_mb{job=\"jetson_remote\"}" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "megabytes"
+        }
+      },
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 4 }
+    }
+  ]
+}

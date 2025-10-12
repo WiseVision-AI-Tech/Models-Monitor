@@ -1,29 +1,11 @@
 groups:
   - name: jetson_alerts
     rules:
-      - alert: HighCpuTemp
-        expr: jetson_cpu_temp_c > 85
-        for: 2m
-        labels:
-          severity: critical
-        annotations:
-          summary: "CPU temperature is high on Jetson"
-          description: "CPU temperature is above 85°C for more than 2 minutes"
-
-      - alert: HighGpuLoad
-        expr: jetson_gpu_load_percent > 90
-        for: 2m
+      - alert: HighGPUUsage
+        expr: jetson_gpu_usage > 90
+        for: 1m
         labels:
           severity: warning
         annotations:
-          summary: "GPU load is high on Jetson"
-          description: "GPU load is above 90% for more than 2 minutes"
-
-      - alert: HighRamUsage
-        expr: (jetson_ram_used_mb / jetson_ram_total_mb) * 100 > 90
-        for: 2m
-        labels:
-          severity: warning
-        annotations:
-          summary: "RAM usage is high on Jetson"
-          description: "RAM usage exceeds 90% for more than 2 minutes"
+          summary: "Jetson GPU usage high"
+          description: "GPU usage is above 90% for over 1 minute."
