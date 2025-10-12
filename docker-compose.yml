@@ -31,6 +31,14 @@ services:
       - "9093:9093"
     networks:
       - monitoring
+    environment:
+      - ALERT_TO=${SMTP_MAIL_TO}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_IDENTITY=${SMTP_IDENTITY}
+    
 
   grafana:
     image: grafana/grafana

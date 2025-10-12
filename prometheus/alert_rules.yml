@@ -1,11 +1,43 @@
 groups:
   - name: jetson_alerts
+    interval: 10s
     rules:
-      - alert: HighGPUUsage
-        expr: jetson_gpu_usage > 90
-        for: 1m
+      # High CPU temperature
+      - alert: HighCPUTemperature
+        expr: jetson_cpu_temp_c > 80
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU Temperature on {{ $labels.instance }}"
+          description: "CPU temperature is {{ $value }}°C"
+
+      # High GPU load
+      - alert: HighGPULoad
+        expr: jetson_gpu_load_percent > 90
+        for: 30s
         labels:
           severity: warning
         annotations:
-          summary: "Jetson GPU usage high"
-          description: "GPU usage is above 90% for over 1 minute."
+          summary: "High GPU Load on {{ $labels.instance }}"
+          description: "GPU load is {{ $value }}%"
+
+      # Low available RAM
+      - alert: LowAvailableRAM
+        expr: (jetson_ram_total_mb - jetson_ram_used_mb) < 500
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low Available RAM on {{ $labels.instance }}"
+          description: "Available RAM is only {{ $value }} MB"
+
+      # GPU idle (optional)
+      - alert: GPUIdle
+        expr: jetson_gpu_load_percent < 5
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "GPU Idle on {{ $labels.instance }}"
+          description: "GPU load is {{ $value }}%"
