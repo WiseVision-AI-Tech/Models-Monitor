@@ -46,3 +46,11 @@ groups:
         annotations:
           summary: "GPU Idle on {{ $labels.instance }}"
           description: "GPU load is {{ $value }}%"
+      - alert: HighCPUCoreFrequency
+        expr: jetson_cpu_core0_freq_mhz > 1800 or jetson_cpu_core1_freq_mhz > 1800 or jetson_cpu_core2_freq_mhz > 1800 or jetson_cpu_core3_freq_mhz > 1800 or jetson_cpu_core4_freq_mhz > 1800 or jetson_cpu_core5_freq_mhz > 1800 or jetson_cpu_core6_freq_mhz > 1800 or jetson_cpu_core7_freq_mhz > 1800
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Core Frequency on {{ $labels.instance }}"
+          description: "One of the CPU cores is running above 1800 MHz (value: {{ $value }} MHz)"
