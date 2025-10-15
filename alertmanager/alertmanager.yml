@@ -1,0 +1,7 @@
+receivers:
+  - name: 'whatsapp-webhook'
+    webhook_configs:
+      - url: 'http://whatsapp_webhook:5000/alert'
+
+route:
+  receiver: 'whatsapp-webhook'

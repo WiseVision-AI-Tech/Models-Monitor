@@ -53,6 +53,20 @@ services:
       - prometheus
     restart: unless-stopped
 
+  whatsapp_webhook:
+    build: ./Whatsapp_webhook
+    container_name: whatsapp_webhook
+    environment:
+      - WHATSAPP_TOKEN=${WHATSAPP_TOKEN}
+      - WHATSAPP_NUMBER=${WHATSAPP_NUMBER}
+      - WHATSAPP_PHONE_ID=${WHATSAPP_PHONE_ID}
+    ports:
+      - "5000:5000"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+
 networks:
   monitoring:
     driver: bridge
