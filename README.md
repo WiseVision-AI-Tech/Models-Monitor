@@ -25,3 +25,12 @@ This repository contains scripts and Docker Compose configuration for monitoring
 git clone https://github.com/WiseVision-AI-Tech/Models-Monitor.git
 cd Models-Monitor
 
+### 2. Fix script permissions
+```bash
+chmod +x scripts/fix_permissions.sh
+./scripts/fix_permissions.sh
+
+### 3. Start the monitoring stack
+```bash
+docker compose up -d
+```
