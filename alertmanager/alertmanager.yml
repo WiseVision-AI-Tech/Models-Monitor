@@ -7,5 +7,5 @@ route:
 receivers:
   - name: "whatsapp"
     webhook_configs:
-      - url: "http://whatsapp-webhook:5000/alert"
+      - url: "http://whatsapp_webhook:5000/alert"
         send_resolved: true

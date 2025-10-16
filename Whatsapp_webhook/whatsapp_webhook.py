@@ -13,7 +13,6 @@ WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_ID")
 
 @app.post("/alert")
 async def alert(request: Request):
-    # Always use the static template jetson_alert
     payload = {
         "messaging_product": "whatsapp",
         "to": WHATSAPP_NUMBER,
