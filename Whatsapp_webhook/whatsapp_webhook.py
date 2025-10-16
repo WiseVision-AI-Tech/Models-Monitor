@@ -3,9 +3,8 @@ import requests
 import os
 import uvicorn
 from dotenv import load_dotenv
-load_dotenv()
-import os
 
+load_dotenv()
 app = FastAPI()
 
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
@@ -14,20 +13,16 @@ WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_ID")
 
 @app.post("/alert")
 async def alert(request: Request):
-    data = await request.json()
-    alert_name = data.get("alerts", [{}])[0].get("labels", {}).get("alertname", "Unknown")
-    message = f"Alert triggered: {alert_name}"
-
+    # Always use the static template jetson_alert
     payload = {
         "messaging_product": "whatsapp",
         "to": WHATSAPP_NUMBER,
         "type": "template",
         "template": {
-            "name": "hello_world",
+            "name": "jetson_alert",
             "language": {"code": "en_US"}
         }
     }
-
 
     headers = {
         "Authorization": f"Bearer {WHATSAPP_TOKEN}",
@@ -40,11 +35,14 @@ async def alert(request: Request):
             json=payload,
             headers=headers
         )
-        response.raise_for_status()  # Raises error if status != 2xx
+        response.raise_for_status()
         return {"status": "ok", "whatsapp_response": response.json()}
     except requests.exceptions.RequestException as e:
-        return {"status": "error", "details": str(e), "whatsapp_response": getattr(e.response, "text", None)}
-
+        return {
+            "status": "error",
+            "details": str(e),
+            "whatsapp_response": getattr(e.response, "text", None)
+        }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)

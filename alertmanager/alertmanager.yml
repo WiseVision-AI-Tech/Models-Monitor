@@ -1,7 +1,11 @@
-receivers:
-  - name: 'whatsapp-webhook'
-    webhook_configs:
-      - url: 'http://whatsapp_webhook:5000/alert'
+global:
+  resolve_timeout: 5m
 
 route:
-  receiver: 'whatsapp-webhook'
+  receiver: "whatsapp"
+
+receivers:
+  - name: "whatsapp"
+    webhook_configs:
+      - url: "http://whatsapp-webhook:5000/alert"
+        send_resolved: true
