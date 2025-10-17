@@ -18,7 +18,7 @@ async def alert(request: Request):
         "to": WHATSAPP_NUMBER,
         "type": "template",
         "template": {
-            "name": "jetson_alert",
+            "name": "hello_world",
             "language": {"code": "en_US"}
         }
     }
