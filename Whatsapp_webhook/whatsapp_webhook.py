@@ -10,6 +10,8 @@ app = FastAPI()
 WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER")
 WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_ID")
+TEMPLATE_NAME = os.environ.get("TEMPLATE_NAME")
+TEMPLATE_CODE = os.environ.get("TEMPLATE_CODE")
 
 @app.post("/alert")
 async def alert(request: Request):
@@ -18,8 +20,8 @@ async def alert(request: Request):
         "to": WHATSAPP_NUMBER,
         "type": "template",
         "template": {
-            "name": "hello_world",
-            "language": {"code": "en_US"}
+            "name": TEMPLATE_NAME,
+            "language": {"code": TEMPLATE_CODE}
         }
     }
 
