@@ -6,4 +6,11 @@ providers:
     folder: ""
     type: file
     options:
-      path: /var/lib/grafana/dashboards
+      path: /var/lib/grafana/dashboards/jetson
+
+  - name: "MLflow Dashboards"
+    orgId: 1
+    folder: ""
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards/mlflow

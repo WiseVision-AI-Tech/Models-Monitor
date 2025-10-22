@@ -68,6 +68,18 @@ services:
       - monitoring
     restart: unless-stopped
 
+  mlflow_exporter:
+    build: ./mlflow_exporter
+    container_name: mlflow_exporter
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_METRICS_URL=${MLFLOW_METRICS_URL}
+      - MLFLOW_HEALTH_URL=${MLFLOW_HEALTH_URL}
+      - MLFLOW_CONTAINERS_URL=${MLFLOW_CONTAINERS_URL}
+    networks:
+      - monitoring
+    restart: unless-stopped
 
 networks:
   monitoring:
