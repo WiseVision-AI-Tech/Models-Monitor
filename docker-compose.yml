@@ -63,7 +63,7 @@ services:
       - TEMPLATE_NAME=${TEMPLATE_NAME}
       - TEMPLATE_CODE=${TEMPLATE_CODE}
     ports:
-      - "5000:5000"
+      - "5001:5000"
     networks:
       - monitoring
     restart: unless-stopped
