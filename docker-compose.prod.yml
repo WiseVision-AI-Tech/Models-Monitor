@@ -19,11 +19,11 @@ jobs:
       BUILD_TAG: prod-${{ github.run_number }}
 
     steps:
-      # 1 Checkout repository
+      # 11 Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2 Set up Docker
+      # 2 Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -31,16 +31,20 @@ jobs:
       - name: Docker login
         run: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-      # 4 Run tests
-      - name: Run tests
+      # 4 Run tests for Whatsapp Webhook
+      - name: Run Whatsapp Webhook tests
         run: |
-          echo "Running unit tests..."
           cd Whatsapp_webhook
-          pytest tests/ --junitxml=report.xml
-        continue-on-error: false
+          pytest tests/ --junitxml=report_whatsapp.xml
 
-      # 5 Build and push Docker images
-      - name: Build & push WhatsApp Webhook image
+      # 5 Run tests for MLFlow Exporter
+      - name: Run MLFlow Exporter tests
+        run: |
+          cd mlflow_exporter
+          pytest tests/ --junitxml=report_mlflow.xml
+
+      # 6 Build and push Docker images
+      - name: Build & push Whatsapp Webhook image
         run: |
           docker build -t $DOCKER_USER/whatsapp_webhook:$BUILD_TAG ./Whatsapp_webhook
           docker push $DOCKER_USER/whatsapp_webhook:$BUILD_TAG
@@ -50,7 +54,7 @@ jobs:
           docker build -t $DOCKER_USER/mlflow_exporter:$BUILD_TAG ./mlflow_exporter
           docker push $DOCKER_USER/mlflow_exporter:$BUILD_TAG
 
-      # 6 Deploy to EC2
+      # 7 Deploy to EC2
       - name: SSH and deploy master
         uses: appleboy/ssh-action@v1.1.0
         with:
@@ -64,11 +68,11 @@ jobs:
             git pull origin master
 
             echo "Stopping current stack"
-            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.master.yml down
 
-            echo "Updating Docker images"
+            echo "Pulling latest Docker images"
             docker pull $DOCKER_USER/whatsapp_webhook:$BUILD_TAG
             docker pull $DOCKER_USER/mlflow_exporter:$BUILD_TAG
 
             echo "Starting updated stack"
-            docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.master.yml up -d --build
