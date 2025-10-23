@@ -19,7 +19,7 @@ jobs:
       BUILD_TAG: prod-${{ github.run_number }}
 
     steps:
-      # 11 Checkout repository
+      # 1 Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v4
 
