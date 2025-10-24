@@ -1,103 +1,92 @@
-name: CI/CD Docker Compose (Master-only)
+version: "3.9"
 
-on:
-  push:
-    branches:
-      - master
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - ./prometheus/data:/prometheus
+    networks:
+      - monitoring
+    depends_on:
+      - pushgateway
+      - alertmanager
+    restart: unless-stopped
 
-env:
-  AWS_REGION: eu-west-1                    
-  ECR_WHATSAPP: whatsapp_webhook
-  ECR_MLFLOW: mlflow_exporter
-  EC2_HOST: ${{ secrets.EC2_HOST }}
-  EC2_USER: ${{ secrets.EC2_USER }}
-  EC2_KEY: ${{ secrets.EC2_KEY }}
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: pushgateway
+    ports:
+      - "9091:9091"
+    networks:
+      - monitoring
+    restart: unless-stopped
 
-jobs:
-  ci-cd:
-    runs-on: ubuntu-latest
-    env:
-      BUILD_TAG: prod-${{ github.run_number }}
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - monitoring
+    restart: unless-stopped
 
-    steps:
-      # 1. Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/data:/var/lib/grafana
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    restart: unless-stopped
 
-      # 2. Configure AWS credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+  whatsapp_webhook:
+    # Will be replaced dynamically by CI/CD:
+    # sed -i "s|image: .*whatsapp_webhook.*|image: $WHATSAPP_IMAGE|" docker-compose.prod.yml
+    image: <ECR_REGISTRY>/whatsapp_webhook:PLACEHOLDER
+    container_name: whatsapp_webhook
+    environment:
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN}
+      WHATSAPP_NUMBER: ${WHATSAPP_NUMBER}
+      WHATSAPP_PHONE_ID: ${WHATSAPP_PHONE_ID}
+      TEMPLATE_NAME: ${TEMPLATE_NAME}
+      TEMPLATE_CODE: ${TEMPLATE_CODE}
+    ports:
+      - "5001:5000"
+    networks:
+      - monitoring
+    restart: unless-stopped
 
-      # 3. Login to Amazon ECR
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+  mlflow_exporter:
+    # Will be replaced dynamically by CI/CD:
+    # sed -i "s|image: .*mlflow_exporter.*|image: $MLFLOW_IMAGE|" docker-compose.prod.yml
+    image: <ECR_REGISTRY>/mlflow_exporter:PLACEHOLDER
+    container_name: mlflow_exporter
+    ports:
+      - "8000:8000"
+    environment:
+      MLFLOW_METRICS_URL: ${MLFLOW_METRICS_URL}
+      MLFLOW_HEALTH_URL: ${MLFLOW_HEALTH_URL}
+      MLFLOW_CONTAINERS_URL: ${MLFLOW_CONTAINERS_URL}
+    networks:
+      - monitoring
+    restart: unless-stopped
 
-      # 4. Run unit tests
-      - name: Run Whatsapp Webhook tests
-        run: |
-          cd Whatsapp_webhook
-          pytest tests/ --junitxml=report_whatsapp.xml
-
-      - name: Run MLFlow Exporter tests
-        run: |
-          cd mlflow_exporter
-          pytest tests/ --junitxml=report_mlflow.xml
-
-      # 5. Build and push Docker images to ECR
-      - name: Build and push Whatsapp Webhook image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          IMAGE_URI=$ECR_REGISTRY/${{ env.ECR_WHATSAPP }}:${{ env.BUILD_TAG }}
-          echo "Building image: $IMAGE_URI"
-          docker build -t $IMAGE_URI ./Whatsapp_webhook
-          docker push $IMAGE_URI
-          echo "WHATSAPP_IMAGE=$IMAGE_URI" >> $GITHUB_ENV
-
-      - name: Build and push MLFlow Exporter image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          IMAGE_URI=$ECR_REGISTRY/${{ env.ECR_MLFLOW }}:${{ env.BUILD_TAG }}
-          echo "Building image: $IMAGE_URI"
-          docker build -t $IMAGE_URI ./mlflow_exporter
-          docker push $IMAGE_URI
-          echo "MLFLOW_IMAGE=$IMAGE_URI" >> $GITHUB_ENV
-
-      # 6. SSH into EC2 and deploy via Docker Compose
-      - name: SSH and deploy to EC2
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ env.EC2_HOST }}
-          username: ${{ env.EC2_USER }}
-          key: ${{ env.EC2_KEY }}
-          envs: AWS_REGION,BUILD_TAG,WHATSAPP_IMAGE,MLFLOW_IMAGE
-          script: |
-            set -e
-            cd ~/Models-Monitor
-            echo "Fetching latest code..."
-            git fetch --all
-            git checkout master
-            git pull origin master
-
-            echo "Logging into AWS ECR from EC2..."
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $(echo $WHATSAPP_IMAGE | cut -d'/' -f1)
-
-            echo "Stopping current containers..."
-            docker compose -f docker-compose.master.yml down
-
-            echo "Updating Docker Compose with latest image tags..."
-            sed -i "s|image: .*whatsapp_webhook.*|image: $WHATSAPP_IMAGE|" docker-compose.master.yml
-            sed -i "s|image: .*mlflow_exporter.*|image: $MLFLOW_IMAGE|" docker-compose.master.yml
-
-            echo "Pulling latest images..."
-            docker pull $WHATSAPP_IMAGE
-            docker pull $MLFLOW_IMAGE
-
-            echo "Starting updated stack..."
-            docker compose -f docker-compose.master.yml up -d
+networks:
+  monitoring:
+    driver: bridge
