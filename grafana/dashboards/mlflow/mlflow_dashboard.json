@@ -77,7 +77,7 @@
       "type": "timeseries",
       "title": "Container Start Time",
       "targets": [
-        { "expr": "container_start_time", "legendFormat": "{{name}}"} 
+        { "expr": "mlops_container_start_time", "legendFormat": "{{name}}"} 
       ],
       "fieldConfig": {
         "defaults": {
