@@ -89,15 +89,15 @@ jobs:
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $(echo $WHATSAPP_IMAGE | cut -d'/' -f1)
 
             echo "Stopping current containers..."
-            docker compose -f docker-compose.master.yml down
+            docker compose -f docker-compose.prod.yml down
 
             echo "Updating Docker Compose with latest image tags..."
-            sed -i "s|image: .*whatsapp_webhook.*|image: $WHATSAPP_IMAGE|" docker-compose.master.yml
-            sed -i "s|image: .*mlflow_exporter.*|image: $MLFLOW_IMAGE|" docker-compose.master.yml
+            sed -i "s|image: .*whatsapp_webhook.*|image: $WHATSAPP_IMAGE|" docker-compose.prod.yml
+            sed -i "s|image: .*mlflow_exporter.*|image: $MLFLOW_IMAGE|" docker-compose.prod.yml
 
             echo "Pulling latest images..."
             docker pull $WHATSAPP_IMAGE
             docker pull $MLFLOW_IMAGE
 
             echo "Starting updated stack..."
-            docker compose -f docker-compose.master.yml up -d
+            docker compose -f docker-compose.prod.yml up -d

@@ -1,21 +1,31 @@
 {
   "id": null,
   "title": "Jetson Monitoring Dashboard",
-  "tags": ["jetson", "monitoring"],
+  "tags": ["jetson", "monitoring", "ai", "hardware"],
   "timezone": "browser",
   "schemaVersion": 16,
-  "version": 3,
+  "version": 4,
   "refresh": "5s",
+  "style": "dark",
+  "fiscalYearStartMonth": 1,
   "panels": [
+    {
+      "type": "row",
+      "title": " System Overview",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
     {
       "type": "gauge",
       "title": "GPU Usage (%)",
+      "datasource": "Prometheus",
       "targets": [{ "expr": "jetson_gpu_load_percent{job=\"jetson_remote\"}" }],
       "fieldConfig": {
         "defaults": {
           "min": 0,
           "max": 100,
           "unit": "percent",
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -26,74 +36,25 @@
           }
         }
       },
-      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
-    },
-    {
-      "type": "timeseries",
-      "title": "CPU Temperature (°C)",
-      "targets": [{ "expr": "jetson_cpu_temp_c{job=\"jetson_remote\"}" }],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 70 },
-              { "color": "red", "value": 85 }
-            ]
-          }
-        }
+      "options": {
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
       },
-      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+      "gridPos": { "x": 0, "y": 1, "w": 6, "h": 5 }
     },
     {
-      "type": "timeseries",
-      "title": "GPU Temperature (°C)",
-      "targets": [{ "expr": "jetson_gpu_temp_c{job=\"jetson_remote\"}" }],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 70 },
-              { "color": "red", "value": 85 }
-            ]
-          }
-        }
-      },
-      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 }
-    },
-    {
-      "type": "timeseries",
-      "title": "SOC0 Temperature (°C)",
-      "targets": [{ "expr": "jetson_soc0_temp_c{job=\"jetson_remote\"}" }],
-      "fieldConfig": { "defaults": { "unit": "celsius" } },
-      "gridPos": { "x": 6, "y": 4, "w": 6, "h": 4 }
-    },
-    {
-      "type": "timeseries",
-      "title": "SOC1 Temperature (°C)",
-      "targets": [{ "expr": "jetson_soc1_temp_c{job=\"jetson_remote\"}" }],
-      "fieldConfig": { "defaults": { "unit": "celsius" } },
-      "gridPos": { "x": 0, "y": 8, "w": 6, "h": 4 }
-    },
-    {
-      "type": "timeseries",
-      "title": "SOC2 Temperature (°C)",
-      "targets": [{ "expr": "jetson_soc2_temp_c{job=\"jetson_remote\"}" }],
-      "fieldConfig": { "defaults": { "unit": "celsius" } },
-      "gridPos": { "x": 6, "y": 8, "w": 6, "h": 4 }
-    },
-    {
-      "type": "timeseries",
+      "type": "gauge",
       "title": "RAM Usage (MB)",
+      "datasource": "Prometheus",
       "targets": [{ "expr": "jetson_ram_used_mb{job=\"jetson_remote\"}" }],
       "fieldConfig": {
         "defaults": {
+          "min": 0,
+          "max": 16000,
           "unit": "megabytes",
+          "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -104,7 +65,92 @@
           }
         }
       },
-      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 4 }
+      "options": {
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "gridPos": { "x": 6, "y": 1, "w": 6, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Temperature (°C)",
+      "datasource": "Prometheus",
+      "targets": [{ "expr": "jetson_cpu_temp_c{job=\"jetson_remote\"}" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 5 }
+    },
+    {
+      "type": "row",
+      "title": "Temperature Sensors",
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "type": "timeseries",
+      "title": "GPU Temperature (°C)",
+      "targets": [{ "expr": "jetson_gpu_temp_c{job=\"jetson_remote\"}" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 70 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "x": 0, "y": 7, "w": 8, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "SOC0 Temperature (°C)",
+      "targets": [{ "expr": "jetson_soc0_temp_c{job=\"jetson_remote\"}" }],
+      "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "palette-classic" } } },
+      "gridPos": { "x": 8, "y": 7, "w": 8, "h": 5 }
+    },
+  {
+    "type": "timeseries",
+    "title": "SOC1 Temperature (°C)",
+    "targets": [
+      { "expr": "jetson_soc1_temp_c{job=\"jetson_remote\"}", "legendFormat": "SOC1" }
+    ],
+    "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "palette-classic" } } },
+    "gridPos": { "x": 16, "y": 7, "w": 4, "h": 5 }
+  },
+  {
+    "type": "timeseries",
+    "title": "SOC2 Temperature (°C)",
+    "targets": [
+      { "expr": "jetson_soc2_temp_c{job=\"jetson_remote\"}", "legendFormat": "SOC2" }
+    ],
+    "fieldConfig": { "defaults": { "unit": "celsius", "color": { "mode": "palette-classic" } } },
+    "gridPos": { "x": 20, "y": 7, "w": 4, "h": 5 }
+  },
+  {
+    "type": "row",
+    "title": "CPU Metrics",
+    "gridPos": { "x": 0, "y": 12, "w": 24, "h": 1 },
+      "collapsed": false
     },
     {
       "type": "timeseries",
@@ -122,6 +168,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
+          "color": { "mode": "palette-classic" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -132,8 +179,9 @@
           }
         }
       },
-      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 6 }
-    },  
+      "options": { "legend": { "displayMode": "list", "placement": "right" } },
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 7 }
+    },
     {
       "type": "timeseries",
       "title": "CPU Per-Core Frequency (MHz)",
@@ -150,6 +198,7 @@
       "fieldConfig": {
         "defaults": {
           "unit": "megahertz",
+          "color": { "mode": "palette-classic" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -160,8 +209,8 @@
           }
         }
       },
-      "gridPos": { "x": 0, "y": 22, "w": 12, "h": 6 }
+      "options": { "legend": { "displayMode": "list", "placement": "right" } },
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 7 }
     }
-
   ]
 }
