@@ -92,7 +92,7 @@
           }
         }
       },
-      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
       "gridPos": { "x": 12, "y": 1, "w": 12, "h": 5 }
     },
     {
