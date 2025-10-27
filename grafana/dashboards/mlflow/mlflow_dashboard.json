@@ -78,18 +78,20 @@
       "gridPos": { "x": 0, "y": 12, "w": 24, "h": 6 }
     },
     {
-      "type": "timeseries",
-      "title": "Container Start Time",
+      "type": "stat",
+      "title": "Container Up Time",
       "targets": [
-        { "expr": "mlops_container_start_time", "legendFormat": "{{name}}"} 
+        { "expr": "time() - mlops_container_start_time", "legendFormat": "{{name}}"} 
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "dateTimeAsIso",
+          "unit": "s",
+          "decimals": 0,
           "color": { "mode": "palette-classic" }
         }
       },
       "gridPos": { "x": 0, "y": 18, "w": 24, "h": 8 }
     }
+
   ]
 }
