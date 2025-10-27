@@ -78,20 +78,21 @@
       "gridPos": { "x": 0, "y": 12, "w": 24, "h": 6 }
     },
     {
-      "type": "stat",
-      "title": "Container Up Time",
-      "targets": [
-        { "expr": "time() - mlops_container_start_time", "legendFormat": "{{name}}"} 
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "s",
-          "decimals": 0,
-          "color": { "mode": "palette-classic" }
-        }
-      },
-      "gridPos": { "x": 0, "y": 18, "w": 24, "h": 8 }
+  "type": "stat",
+  "title": "Container Up Time",
+  "targets": [
+    { "expr": "time() - min by(name) (mlops_container_start_time)", "legendFormat": "{{name}}"} 
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "unit": "s",
+      "decimals": 0,
+      "color": { "mode": "palette-classic" }
     }
+  },
+  "gridPos": { "x": 0, "y": 18, "w": 24, "h": 8 }
+}
+
 
   ]
 }
