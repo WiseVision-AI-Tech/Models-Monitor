@@ -85,3 +85,13 @@ groups:
         annotations:
           summary: "Container {{ $labels.name }} restarted frequently"
           description: "Restart count: {{ $value }}"
+
+      
+      - alert: MLflowContainerNoData
+        expr: absent(mlops_container_up)
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No data received from MLflow container exporter"
+          description: "Prometheus has not received any metrics from MLflow exporter for at least 2 minutes — exporter may have crashed or container is unreachable."
