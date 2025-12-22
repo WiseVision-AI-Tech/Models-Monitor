@@ -1,0 +1,45 @@
+[Unit]
+Description=Jetson Metric Collector - Push metrics to external Prometheus Pushgateway
+Documentation=https://github.com/WiseVision-AI-Tech/Models-Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/jetson-monitoring
+
+# Environment variables for the metric collection script
+Environment="PUSHGATEWAY_URL=http://10.0.4.42:9091"
+Environment="JOB_NAME=jetson_remote"
+Environment="SCRAPE_INTERVAL=5"
+Environment="INSTANCE_LABEL=jetson-primary"
+Environment="LOG_LEVEL=INFO"
+
+# Execute the metric collection script
+ExecStart=/opt/jetson-monitoring/jetson_fetch.sh
+
+# Restart policy: always restart, wait 5s between restarts
+Restart=always
+RestartSec=5
+
+# Resource limits
+# Increase timeout for tegrastats execution
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+# Standard output/error handling
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jetson-monitoring
+
+# Security: Run with minimal privileges if possible
+# Note: tegrastats may require elevated privileges, so comment out if needed
+# PrivateDevices=yes
+# NoNewPrivileges=yes
+
+# Keep the service running if main process exits unexpectedly
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
