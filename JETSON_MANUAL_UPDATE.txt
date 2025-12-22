@@ -1,0 +1,38 @@
+MANUAL JETSON UPDATE - COPY & PASTE
+
+1. First, copy the updated script to Jetson from monitoring VM:
+
+   scp /home/ubuntu/projects/Models-Monitor/jetson/jetson_fetch.sh wisevision@10.20.23.55:/home/wisevision/Monitoring/
+
+2. Then SSH into Jetson:
+
+   ssh wisevision@10.20.23.55
+
+3. Copy and paste THIS ENTIRE BLOCK into the Jetson terminal:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+sudo cp /home/wisevision/Monitoring/jetson_fetch.sh /opt/jetson-monitoring/
+sudo chmod +x /opt/jetson-monitoring/jetson_fetch.sh
+sudo systemctl restart jetson-monitoring
+sleep 5
+echo "=== LOGS ==="
+sudo journalctl -u jetson-monitoring -n 20
+echo ""
+echo "=== STATUS ==="
+sudo systemctl status jetson-monitoring
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4. Then back on monitoring VM, check if metrics are coming in:
+
+   curl http://localhost:9091/metrics | grep jetson_
+
+Expected output:
+  jetson_cpu_temp_c{instance="jetson-10.20.23.55"} 51.937
+  jetson_gpu_temp_c{instance="jetson-10.20.23.55"} 49.875
+  jetson_ram_used_mb{instance="jetson-10.20.23.55"} 4413
+  etc...
+
+If you see these metrics →  SUCCESS!
+If you don't see them → check the logs from step 3

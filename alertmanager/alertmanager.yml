@@ -1,0 +1,60 @@
+global:
+  resolve_timeout: 5m
+  # SMTP configuration for email notifications
+  smtp_from: 'alerts@monitoring.local'
+  # Uncomment and configure if using SMTP:
+  # smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+  # smtp_auth_username: '${SMTP_USER}'
+  # smtp_auth_password: '${SMTP_PASS}'
+
+# Templates for alert formatting
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Define routes for alert handling
+route:
+  # Default receiver (required)
+  receiver: 'null'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'cluster', 'service']
+  
+  # How long to wait before sending a notification for a new group
+  group_wait: 10s
+  
+  # How long to wait before resending a notification
+  group_interval: 10s
+  
+  # How long a notification should inhibit further notifications
+  repeat_interval: 12h
+
+# Receivers define what happens when alerts are triggered
+receivers:
+  - name: 'null'
+    # Null receiver - does nothing (default sink)
+
+# Optional: webhook receiver example for custom integrations
+# Uncomment to add webhook notifications:
+#  - name: 'webhook'
+#    webhook_configs:
+#      - url: 'http://example.com/alerts'
+#        send_resolved: true
+
+# Optional: Slack integration
+# Uncomment and configure if using Slack:
+#  - name: 'slack'
+#    slack_configs:
+#      - api_url: '${SLACK_WEBHOOK}'
+#        channel: '#alerts'
+#        send_resolved: true
+#        title: 'Alert: {{ .GroupLabels.alertname }}'
+#        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+# Inhibit rules to suppress certain alerts
+inhibit_rules: []
+  # Example: suppress low priority alerts when high priority alerts exist
+  # - source_match:
+  #     severity: 'critical'
+  #   target_match:
+  #     severity: 'warning'
+  #   equal: ['alertname', 'dev', 'instance']

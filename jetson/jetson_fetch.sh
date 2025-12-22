@@ -141,7 +141,8 @@ collect_metrics() {
     debug "GPU Temp: ${gpu_temp}°C"
     
     # --- Parse GPU load/frequency (GR3D_FREQ) ---
-    gpu_load=$(echo "$output" | grep -oP 'GR3D_FREQ \K\d+' || echo "0")
+    # Handle both formats: "GR3D_FREQ 0%" and "GR3D_FREQ 0%@[305]"
+    gpu_load=$(echo "$output" | grep -oP 'GR3D_FREQ \K\d+(?=%|@)' || echo "0")
     debug "GPU Load: ${gpu_load}%"
     
     # --- Parse SOC temperatures (Jetson Xavier/Orin have multiple SOCs) ---

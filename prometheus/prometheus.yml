@@ -13,6 +13,8 @@ alerting:
   alertmanagers:
     - static_configs:
         - targets: ['alertmanager:9093']
+          labels:
+            service: 'alertmanager'
 
 # Scrape configurations
 scrape_configs:
@@ -21,7 +23,7 @@ scrape_configs:
   # Prometheus pulls from here every scrape_interval
   - job_name: 'pushgateway'
     static_configs:
-      - targets: ['localhost:9091']
+      - targets: ['pushgateway:9091']
         labels:
           service: 'metrics-collection'
 
@@ -29,7 +31,7 @@ scrape_configs:
   # Monitor Prometheus itself
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['prometheus:9090']
         labels:
           service: 'prometheus'
 
