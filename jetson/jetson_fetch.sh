@@ -103,52 +103,72 @@ collect_metrics() {
     local output
     
     # Run tegrastats with timeout (3s should be enough for one iteration)
-    output=$(timeout 3s "$TEGRAPATH" 2>/dev/null | head -n 1) || {
-        error "Failed to read tegrastats. Is this an NVIDIA Jetson device?"
-        return 1
-    }
-    
-    [[ -z "$output" ]] && {
+    output=$(sudo timeout 3s "$TEGRAPATH" 2>/dev/null | head -n 1)
+    echo "DEBUG: tegrastats output: $output" >&2
+    if [[ -z "$output" ]]; then
         error "tegrastats returned empty output"
         return 1
-    }
-    
+    fi
     debug "Raw tegrastats: $output"
     
     # Parse metrics from tegrastats output
     local ram_used ram_total cpu_temp gpu_load gpu_temp soc0_temp soc1_temp soc2_temp
     local cpu_usage_metrics cpu_freq_metrics
     
-    # --- Parse RAM (format: RAM 1234/7654 example) ---
-    ram_used=$(echo "$output" | grep -oP 'RAM \K\d+(?=/)' || echo "") && [[ -z "$ram_used" ]] && {
+    # --- Parse RAM (format: RAM 1234/7654MB ...) ---
+    ram_used=$(echo "$output" | awk -F'RAM |/' '{print $2}' | awk '{print $1}')
+    ram_total=$(echo "$output" | awk -F'RAM |/' '{print $3}' | awk -F'MB' '{print $1}' | awk '{print $1}')
+    [[ -z "$ram_used" ]] && {
         error "Failed to parse RAM used from: $output"
         return 1
     }
-    
-    ram_total=$(echo "$output" | grep -oP 'RAM \d+/\K\d+' || echo "") && [[ -z "$ram_total" ]] && {
-        error "Failed to parse RAM total"
+    [[ -z "$ram_total" ]] && {
+        error "Failed to parse RAM total from: $output"
         return 1
     }
-    
     debug "RAM: ${ram_used}/${ram_total} MB"
-    
+
     # --- Parse CPU temperature ---
     cpu_temp=$(echo "$output" | grep -oP 'cpu@\K\d+(\.\d+)?' || echo "0")
+    [[ -z "$cpu_temp" ]] && {
+        error "Failed to parse CPU temperature from: $output"
+        return 1
+    }
     debug "CPU Temp: ${cpu_temp}°C"
-    
+
     # --- Parse GPU temperature ---
     gpu_temp=$(echo "$output" | grep -oP 'gpu@\K\d+(\.\d+)?' || echo "0")
+    [[ -z "$gpu_temp" ]] && {
+        error "Failed to parse GPU temperature from: $output"
+        return 1
+    }
     debug "GPU Temp: ${gpu_temp}°C"
-    
+
     # --- Parse GPU load/frequency (GR3D_FREQ) ---
     # Handle both formats: "GR3D_FREQ 0%" and "GR3D_FREQ 0%@[305]"
     gpu_load=$(echo "$output" | grep -oP 'GR3D_FREQ \K\d+(?=%|@)' || echo "0")
+    [[ -z "$gpu_load" ]] && {
+        error "Failed to parse GPU load from: $output"
+        return 1
+    }
     debug "GPU Load: ${gpu_load}%"
-    
+
     # --- Parse SOC temperatures (Jetson Xavier/Orin have multiple SOCs) ---
     soc0_temp=$(echo "$output" | grep -oP 'soc0@\K\d+(\.\d+)?' || echo "0")
     soc1_temp=$(echo "$output" | grep -oP 'soc1@\K\d+(\.\d+)?' || echo "0")
     soc2_temp=$(echo "$output" | grep -oP 'soc2@\K\d+(\.\d+)?' || echo "0")
+    [[ -z "$soc0_temp" ]] && {
+        error "Failed to parse soc0_temp from: $output"
+        return 1
+    }
+    [[ -z "$soc1_temp" ]] && {
+        error "Failed to parse soc1_temp from: $output"
+        return 1
+    }
+    [[ -z "$soc2_temp" ]] && {
+        error "Failed to parse soc2_temp from: $output"
+        return 1
+    }
     debug "SOC Temps: ${soc0_temp}°C, ${soc1_temp}°C, ${soc2_temp}°C"
     
     # --- Parse per-core CPU usage and frequency ---
