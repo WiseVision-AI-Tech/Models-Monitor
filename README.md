@@ -252,6 +252,24 @@ Restart Prometheus:
 docker compose restart prometheus
 ```
 
+## Alert Rule Generation (IMPORTANT)
+
+Before starting the stack, you must generate the alert rules file on the host:
+
+```bash
+./prometheus/generate-rules.sh
+```
+
+This will create or update `./prometheus/alert_rules.yml` using your thresholds from `./prometheus/alert-config.env`.
+
+- If you change any values in `./prometheus/alert-config.env`, you must re-run the script before restarting the stack.
+- The file `./prometheus/alert_rules.yml` is mounted directly into the Prometheus container.
+- Do NOT edit `alert_rules.yml` by hand; always use the script.
+
+If you skip this step, Prometheus will not have any alert rules loaded and no alerts will fire.
+
+---
+
 ## Troubleshooting
 
 ### Jetson Service Not Running

@@ -3,10 +3,15 @@
 
 set -e
 
-# Load alert config
+
+# Load alert config (container or host)
 if [ -f "/etc/prometheus/alert-config.env" ]; then
     set -a
     . /etc/prometheus/alert-config.env
+    set +a
+elif [ -f "./prometheus/alert-config.env" ]; then
+    set -a
+    . ./prometheus/alert-config.env
     set +a
 fi
 
@@ -27,8 +32,20 @@ export GPU_IDLE_DURATION=${GPU_IDLE_DURATION:-1m}
 export CPU_FREQ_THRESHOLD=${CPU_FREQ_THRESHOLD:-1800}
 export CPU_FREQ_DURATION=${CPU_FREQ_DURATION:-30s}
 
-# Generate alert_rules.yml from template
-envsubst < /etc/prometheus/alert_rules.yml.template > /etc/prometheus/alert_rules.yml
+
+# Determine if running in container or on host
+if [ -f /etc/prometheus/alert_rules.yml.template ]; then
+    TEMPLATE_PATH=/etc/prometheus/alert_rules.yml.template
+    OUTPUT_PATH=/etc/prometheus/alert_rules.yml
+elif [ -f ./prometheus/alert_rules.yml.template ]; then
+    TEMPLATE_PATH=./prometheus/alert_rules.yml.template
+    OUTPUT_PATH=./prometheus/alert_rules.yml
+else
+    echo "ERROR: alert_rules.yml.template not found."
+    exit 1
+fi
+
+envsubst < "$TEMPLATE_PATH" > "$OUTPUT_PATH"
 
 echo "Alert rules generated with:"
 echo "  TEMP_THRESHOLD=${TEMP_THRESHOLD}°C"
