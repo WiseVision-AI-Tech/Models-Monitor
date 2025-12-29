@@ -1,0 +1,70 @@
+groups:
+  - name: jetson_alerts
+    interval: 10s
+    rules:
+      - alert: HighTemperature
+        expr: jetson_cpu_temp_c > ${TEMP_THRESHOLD}
+        for: ${TEMP_DURATION}
+        labels:
+          severity: critical
+          alert_type: temperature
+        annotations:
+          summary: "High CPU Temperature on {{ $labels.instance }}"
+          description: "Hey Wisevision team, the CPU has surpassed ${TEMP_THRESHOLD}°C for ${TEMP_DURATION}. Current temperature: {{ $value }}°C"
+
+      - alert: HighGPUUsage
+        expr: jetson_gpu_load_percent > ${GPU_THRESHOLD}
+        for: ${GPU_DURATION}
+        labels:
+          severity: critical
+          alert_type: gpu
+        annotations:
+          summary: "High GPU Usage on {{ $labels.instance }}"
+          description: "Hey Wisevision team, the GPU has surpassed ${GPU_THRESHOLD}% for ${GPU_DURATION}. Current usage: {{ $value }}%"
+
+      - alert: LowAvailableRAM
+        expr: (jetson_ram_total_mb - jetson_ram_used_mb) < ${RAM_AVAILABLE_THRESHOLD}
+        for: ${RAM_AVAILABLE_DURATION}
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low Available RAM on {{ $labels.instance }}"
+          description: "Available RAM is only {{ $value }} MB"
+
+      - alert: HighRAMUsage
+        expr: jetson_ram_used_mb > ${RAM_THRESHOLD_MB}
+        for: ${RAM_DURATION}
+        labels:
+          severity: critical
+          alert_type: ram
+        annotations:
+          summary: "High RAM Usage on {{ $labels.instance }}"
+          description: "Hey Wisevision team, the RAM has surpassed ${RAM_THRESHOLD_GB}GB. Current usage: {{ $value }} MB"
+
+      - alert: CPUCoreImbalance
+        expr: jetson_cpu_core0_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core1_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core2_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core3_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core4_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core5_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core6_percent > ${CPU_CORE_THRESHOLD} or jetson_cpu_core7_percent > ${CPU_CORE_THRESHOLD}
+        for: ${CPU_CORE_DURATION}
+        labels:
+          severity: critical
+          alert_type: cpu
+        annotations:
+          summary: "CPU Core Imbalance on {{ $labels.instance }}"
+          description: "Hey Wisevision team, the CPU has surpassed ${CPU_CORE_THRESHOLD}% for ${CPU_CORE_DURATION}. Current value: {{ $value }}%"
+
+      - alert: GPUIdle
+        expr: jetson_gpu_load_percent < ${GPU_IDLE_THRESHOLD}
+        for: ${GPU_IDLE_DURATION}
+        labels:
+          severity: info
+        annotations:
+          summary: "GPU Idle on {{ $labels.instance }}"
+          description: "GPU load is {{ $value }}%"
+      - alert: HighCPUCoreFrequency
+        expr: jetson_cpu_core0_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core1_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core2_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core3_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core4_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core5_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core6_freq_mhz > ${CPU_FREQ_THRESHOLD} or jetson_cpu_core7_freq_mhz > ${CPU_FREQ_THRESHOLD}
+        for: ${CPU_FREQ_DURATION}
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Core Frequency on {{ $labels.instance }}"
+          description: "One of the CPU cores is running above ${CPU_FREQ_THRESHOLD} MHz (value: {{ $value }} MHz)"
+

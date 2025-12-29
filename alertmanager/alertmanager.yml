@@ -14,24 +14,56 @@ templates:
 # Define routes for alert handling
 route:
   # Default receiver (required)
-  receiver: 'null'
+  receiver: 'telegram'
   
   # Group alerts by these labels
-  group_by: ['alertname', 'cluster', 'service']
+  group_by: ['alertname', 'cluster', 'service', 'instance']
   
   # How long to wait before sending a notification for a new group
   group_wait: 10s
   
   # How long to wait before resending a notification
-  group_interval: 10s
+  group_interval: 5m
   
   # How long a notification should inhibit further notifications
   repeat_interval: 12h
+  
+  # Route specific alerts to Telegram
+  routes:
+    - match:
+        alert_type: temperature
+      receiver: 'telegram'
+      continue: false
+    - match:
+        alert_type: cpu
+      receiver: 'telegram'
+      continue: false
+    - match:
+        alert_type: gpu
+      receiver: 'telegram'
+      continue: false
+    - match:
+        alert_type: ram
+      receiver: 'telegram'
+      continue: false
+    # Fallback: send all critical alerts to Telegram
+    - match:
+        severity: critical
+      receiver: 'telegram'
 
 # Receivers define what happens when alerts are triggered
 receivers:
   - name: 'null'
     # Null receiver - does nothing (default sink)
+
+  # Telegram webhook receiver
+  - name: 'telegram'
+    webhook_configs:
+      - url: 'http://telegram-webhook:5000/webhook'
+        send_resolved: false
+        http_config:
+          follow_redirects: true
+        max_alerts: 10
 
 # Optional: webhook receiver example for custom integrations
 # Uncomment to add webhook notifications:
